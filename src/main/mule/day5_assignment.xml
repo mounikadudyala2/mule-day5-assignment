@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e252c528-5634-4d0e-8786-cc8db4bc8717" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="17203f8b-9692-4907-a37f-366ead26e535" >
+		<file:connection workingDir="/Users/mounikad/Desktop/mulesoft/day5_assignment/Output" />
+	</file:config>
+	<flow name="day5_assignmentFlow" doc:id="c15222f5-5913-441f-9b1d-30b069a48fef" >
+		<http:listener doc:name="Listener" doc:id="ea9e2bbe-43d8-4b2d-b8cd-eda89ec0d4f7" config-ref="HTTP_Listener_config" path="/day5-assignment"/>
+		<ee:transform doc:name="Transform Message" doc:id="50f44d4b-256d-48eb-a9cc-c900d403a488" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload.employees.*department map(d,i) -> (
+	d.employees.*employee map (d1,i1) -> {
+		"ID":d1.@id,
+		"name":d1.firstname ++ " " ++ d1.lastname,
+		"Designation":d1.designation,
+		"Department":d.name
+	}
+))
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="dc9ff742-2ea5-4b03-9de8-183f6ce351f4" message="#[payload]"/>
+	</flow>
+</mule>
